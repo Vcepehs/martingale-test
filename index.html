@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+
+
+   <style>
+        :root {
+            --text-muted: #9ca3af;
+            --bg-dark: #0b0f17;
+            --bg-card: rgba(15,42,33,0.9);
+            --green-soft: #4ade80;
+            --green-accent: #22c55e;
+            --danger: #ef4444;
+            --neutral: #eab308;
+            --text-light: #d9fbe5;
+            --neon-pink: #ff0080;
+            --neon-blue: #00ffff;
+            --neon-purple: #9d00ff;
+        }
+
+        /* === Основная тема: Киберпанк === */
+        body {
+            background: linear-gradient(-45deg, #0b0f17, #1a0a2a, #3b0066, #ff0080);
+            background-size: 400% 400%;
+            color: var(--text-light);
+            font-family: 'Orbitron', Arial, sans-serif;
+            padding: 40px;
+            transition: background 0.5s, color 0.5s;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h1, h2, p, small {
+            transition: color 0.5s;
+        }
+
+        h1 {
+            position: relative;
+        
+            font-family: 'Orbitron', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: 1.6px;
+        
+            color: #eaffff;
+        
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        
+            /* ОБЪЁМ + НЕОН */
+            text-shadow:
+                /* толщина стекла */
+                0 1px 0 #cfffff,
+                0 2px 0 #a8f3ff,
+                0 3px 0 #7be7ff,
+                0 4px 0 #4fdcff,
+        
+                /* внутренняя яркость */
+                0 0 3px #ffffff,
+        
+                /* неоновая трубка */
+                0 0 10px #00eaff,
+                0 0 22px #00eaff,
+                0 0 44px #00bcd4,
+                0 0 80px rgba(0, 188, 212, 0.95);
+        
+            animation: neonDepthPulse 3s ease-in-out infinite;
+        }
+        
+        /* Пульсация */
+        @keyframes neonDepthPulse {
+            0% {
+                text-shadow:
+                    0 1px 0 #cfffff,
+                    0 2px 0 #a8f3ff,
+                    0 3px 0 #7be7ff,
+                    0 4px 0 #4fdcff,
+        
+                    0 0 3px #ffffff,
+                    0 0 10px #00eaff,
+                    0 0 22px #00eaff,
+                    0 0 44px #00bcd4,
+                    0 0 80px rgba(0, 188, 212, 0.9);
+            }
+        
+            50% {
+                text-shadow:
+                    0 1px 0 #ffffff,
+                    0 2px 0 #d7fbff,
+                    0 3px 0 #aaf1ff,
+                    0 4px 0 #6ee7ff,
+        
+                    0 0 6px #ffffff,
+                    0 0 18px #00eaff,
+                    0 0 36px #00eaff,
+                    0 0 70px #00bcd4,
+                    0 0 120px rgba(0, 188, 212, 1);
+            }
+        
+            100% {
+                text-shadow:
+                    0 1px 0 #cfffff,
+                    0 2px 0 #a8f3ff,
+                    0 3px 0 #7be7ff,
+                    0 4px 0 #4fdcff,
+        
+                    0 0 3px #ffffff,
+                    0 0 10px #00eaff,
+                    0 0 22px #00eaff,
+                    0 0 44px #00bcd4,
+                    0 0 80px rgba(0, 188, 212, 0.9);
+            }
+        }
+
+
+
+
+
+        .h1-wrapper {
+            text-align: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        h1::after {
+            content: attr(data-text);
+            position: absolute;
+            inset: 0;
+        
+            background: linear-gradient(
+                90deg,
+                #6b7cff,
+                #9d00ff,
+                #ff00ff
+            );
+        
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        
+            filter: blur(9px);
+            opacity: 0.85;
+            z-index: -1;
+            pointer-events: none;
+
+          } 
+
+
+
+        h2 {
+            text-align: center;
+            margin-top: 0;     /* убираем дефолтный верхний отступ */
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-shadow: 0 0 4px var(--neon-blue);
+        }
+
+        p small {
+            display: block;          /* чтобы занимал всю ширину блока */
+            text-align: center;      /* выравнивание текста по центру */
+            margin: 20px auto 0;     /* сверху 20px, снизу 0, по бокам auto для центрирования */
+            max-width: 520px;        /* чтобы ширина совпадала с карточками */
+            color: var(--text-muted);/* цвет немного приглушённый */
+        }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            max-width: 520px;
+            margin: 40px auto;
+            padding: 28px;
+            background: linear-gradient(135deg, rgba(15,42,33,0.9), rgba(0,0,0,0.7));
+            border-radius: 18px;
+            box-shadow: 0 0 20px var(--neon-blue), inset 0 0 8px var(--neon-purple);
+            animation: cardFade 0.6s ease both;
+            transition: background 0.5s, color 0.5s, box-shadow 0.5s;
+            border-radius: 18px;
+            overflow: hidden;  /* тень больше не торчит */
+        }
+
+        @keyframes cardFade {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .param-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .param-grid label {
+            padding: 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.02);
+            transition: background 0.2s, transform 0.2s, box-shadow 0.3s;
+        }
+
+        .param-grid label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .param-grid input {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(20,20,20,0.7);
+            color: #d9fbe5;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.3s all;
+            box-shadow: 0 0 2px rgba(255,255,255,0.1);
+        }
+
+        /* Placeholder тоже светится */
+        .param-grid input::placeholder {
+            color: rgba(217,251,229,0.5);
+            text-shadow: 0 0 2px var(--neon-blue);
+            transition: 0.3s all;
+        }
+
+        .param-grid input:focus::placeholder {
+            color: var(--text-light);
+            text-shadow: 0 0 4px var(--neon-blue), 0 0 8px var(--neon-pink);
+        }
+
+        .param-grid input:focus {
+            outline: none;
+            border: 1px solid var(--neon-pink);
+            box-shadow: 
+                0 0 6px var(--neon-pink),
+                0 0 12px var(--neon-blue),
+                0 0 18px var(--neon-purple);
+            background: rgba(20,20,20,0.9);
+            transform: scale(1.03);
+        }
+
+        button {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px;
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-blue));
+            color: #000;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 0 12px var(--neon-pink), 0 0 20px var(--neon-blue);
+            transition: transform 0.2s, filter 0.2s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        .summary {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .summary div {
+            flex: 1;
+            min-width: 140px;
+            background: rgba(0,0,0,0.4);
+            padding: 18px 12px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 0 10px var(--neon-purple), inset 0 0 6px var(--neon-blue);
+            transition: transform 0.2s, box-shadow 0.3s;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .summary div:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px var(--neon-purple);
+        }
+
+        .summary span {
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .summary strong {
+            display: block;
+            font-size: 26px;
+            margin-top: 6px;
+            color: var(--green-soft);
+            transition: color 0.5s;
+        }
+
+        .card table { 
+            display: table; 
+            width: 100%; 
+            max-width: none;
+            overflow-x: auto; 
+            white-space: normal; 
+            border-collapse: separate;
+            border-spacing: 0;
+            background: rgba(0,0,0,0.35);
+            border-radius: 14px;
+            box-shadow: 0 0 12px var(--neon-blue);
+            transition: background 0.5s;
+        }
+
+        .table-wrapper {
+            overflow-x: hidden;           /* скролл при необходимости */
+            -webkit-overflow-scrolling: touch;
+            display: flex;              /* для центрирования */
+            justify-content: center;    /* по горизонтали */
+            width: 100%;
+            padding: 8px 0; /* добавляем сверху и снизу пространство */
+            box-sizing: border-box; /* чтобы padding учитывался внутри ширины */
+            border-radius: 14px;        /* скругляем углы, чуть меньше чем у карточки */
+            overflow: hidden;           /* обрезаем торчащие углы таблицы */
+            border-collapse: separate;
+        }
+
+        .table-wrapper table {
+            display: table;
+            width: auto;                /* таблица занимает только нужное место */
+            table-layout: auto;         /* колонки подстраиваются под контент */
+            border-collapse: separate;
+            border-spacing: 0; /* чтобы не было лишнего пространства между ячейками */
+            border-radius: inherit;
+            overflow: hidden; /* обрезаем торчащие строки */
+        }
+
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            transition: color 0.5s, text-shadow 0.5s;
+        }
+
+        th {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.05);
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(6px);
+        }
+
+        /* Верхние углы таблицы */
+        table thead tr th:first-child {
+            border-top-left-radius: 14px;
+        }
+        table thead tr th:last-child {
+            border-top-right-radius: 14px;
+        }
+
+        /* Нижние углы таблицы */
+        table tbody tr:last-child td:first-child {
+            border-bottom-left-radius: 0;
+        }
+
+        table tbody tr:last-child td:last-child {
+            border-bottom-right-radius: 0;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: rgba(255,255,255,0.03);
+        }
+
+        tbody tr:hover {
+            background: rgba(0,255,255,0.25); /* фон стал ярче */
+            transform: translateY(-1px);
+            text-shadow: 0 0 12px var(--neon-blue); /* тень текста сильнее */
+            box-shadow: 0 0 20px var(--neon-blue) inset, 0 0 12px var(--neon-blue); /* внутренняя и внешняя подсветка */
+        }
+
+
+        tbody tr.danger td:nth-child(3),
+        tbody tr.danger td:nth-child(4) {
+            color: var(--danger);
+        }
+
+        .profit {
+            color: var(--green-accent);
+            font-weight: 600;
+            text-shadow: 0 0 6px var(--green-accent);
+        }
+
+        .loss {
+            color: var(--danger);
+            font-weight: 600;
+            text-shadow: 0 0 6px var(--danger);
+        }
+
+        .neutral {
+            color: var(--neutral);
+            font-weight: 600;
+            text-shadow: 0 0 6px var(--neutral);
+        }
+
+        .risk-warning {
+            margin: 20px auto 0;
+            padding: 14px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: #fff;
+            background: linear-gradient(45deg, #ff005c, #ff00ff);
+            box-shadow: 0 0 12px #ff00ff, 0 0 20px #ff005c;
+            animation: pulse 1.5s infinite;
+            max-width: 480px;
+            display: none;
+            text-shadow: 0 0 6px #fff;
+        }
+
+        .risk-warning.show {
+            display: block;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .theme-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-blue));
+            color: #000;
+            border-radius: 14px;
+            font-weight: 600;
+            padding: 12px 18px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 0 12px var(--neon-pink), 0 0 20px var(--neon-blue);
+            transition: transform 0.15s, filter 0.2s, box-shadow 0.3s;
+        }
+
+        .theme-btn:hover {
+            filter: brightness(1.2);
+            transform: scale(1.05);
+        }
+
+        .theme-btn:active {
+            transform: scale(0.95);
+        }
+
+       .balaclava-text {
+           position: absolute;
+           top: 50%;
+           left: 60%;
+           transform: translateY(20%) rotate(10deg) skewY(-20deg);
+           font-family: 'Great Vibes', cursive;
+           font-size: 50px;
+           font-weight: 400;
+           background: linear-gradient(45deg, #ff00ff, #ff66ff, #cc66ff);
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+           text-shadow:
+             0 0 2px #fff,
+             0 0 6px #ff66ff,
+             0 0 12px #cc66ff,
+             0 0 18px #ff00ff;
+           pointer-events: none;
+           white-space: nowrap;
+           z-index: 6;
+           display: inline-block;
+       
+           padding-bottom: 8px; /* пространство для линии */
+       }
+        
+        /* Основное мерцание всей фразы */
+        @keyframes flickerText {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% {
+                opacity: 1;
+                text-shadow: 
+                    0 0 2px #fff, 
+                    0 0 6px #ff66ff, 
+                    0 0 12px #cc66ff, 
+                    0 0 18px #ff00ff;
+            }
+            20%, 24%, 55% {
+                opacity: 0.4;
+                text-shadow: none;
+            }
+            50% {
+                opacity: 0.2;
+                text-shadow: 
+                    0 0 1px #fff, 
+                    0 0 3px #ff66ff;
+            }
+            75% {
+                opacity: 0.6;
+                text-shadow: 
+                    0 0 2px #fff, 
+                    0 0 4px #cc66ff, 
+                    0 0 10px #ff00ff;
+            }
+        
+        }
+
+        .balaclava-text::after {
+            content: '';
+            position: absolute; /* важное изменение */
+            left: 0;
+            right: 0;
+            bottom: 1px;          /* линия начинается под текста */
+            height: 1.5px;     /* толщина линии */
+            background: #ff66ff;
+            box-shadow: 0 0 10px #ff66ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+            pointer-events: none;
+            z-index: 10;     /* чтобы линия была поверх текста */
+        }
+
+     
+
+        /* === Альтернативная тема: Чёрно-зелёная === */
+        body.alt-theme {
+            background: linear-gradient(180deg, #0a0a0a, #001100, #002200, #004400);
+            background-size: 400% 400%;
+            color: #a3ff7f;
+            animation: altGradientBG 15s ease infinite;
+        }
+
+        @keyframes altGradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body.alt-theme .card {
+            background: rgba(10,15,10,0.85);
+            box-shadow: 0 10px 30px rgba(34,255,34,0.2), inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        body.alt-theme h1,
+        body.alt-theme h2 {
+            color: #a3ff7f;
+            text-shadow: 0 0 6px #33cc33;
+        }
+
+        body.alt-theme .summary div {
+            background: linear-gradient(180deg, rgba(0,50,0,0.25), rgba(0,100,0,0.15));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 25px rgba(0,200,0,0.15);
+        }
+
+        body.alt-theme button,
+        body.alt-theme .theme-btn {
+            background: linear-gradient(45deg, #33cc33, #66ff66);
+            box-shadow: 0 0 10px #33cc33, 0 0 18px #66ff66;
+            color: #000;
+        }
+
+        body.alt-theme td {
+            color: #a3ff7f;
+        }
+
+        body.alt-theme td:nth-child(4) {
+            color: #33cc33;
+        }
+
+        body.alt-theme tbody tr.danger td:nth-child(3),
+        body.alt-theme tbody tr.danger td:nth-child(4) {
+            color: #ff4444;
+        }
+
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .social-buttons { 
+            position: fixed;
+            bottom: 20px;
+            left: 350px;
+            display: flex;
+            gap: 12px;
+            z-index: 999; /* выше частиц */ 
+        }
+
+        
+        .social-buttons video {
+            width: 128px;
+            height: 128px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        
+            box-shadow:
+                0 0 10px var(--neon-pink),
+                0 0 18px var(--neon-blue);
+        
+            transition: box-shadow 0.3s, transform 0.2s, filter 0.2s;
+        }
+
+        /* Альтернативная тема — чёрно-зелёная */
+        body.alt-theme .social-buttons video {
+            box-shadow:
+                0 0 10px rgba(51, 204, 51, 0.6),
+                0 0 18px rgba(102, 255, 102, 0.4);
+        }
+        
+        .social-buttons video:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+        }
+
+        /* === Ультра-мобильная адаптация === */
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+                font-size: 14px;
+            }
+        
+            h1 {
+                font-size: 28px;
+            }
+        
+            h2 {
+                font-size: 18px;
+            }
+        
+            .param-grid {
+                grid-template-columns: 1fr; /* одна колонка */
+                gap: 10px;
+            }
+        
+            .param-grid label {
+                font-size: 14px;
+                display: block;
+                margin-bottom: 4px;
+            }
+        
+            .param-grid input {
+                width: 100%;
+                padding: 10px;
+                font-size: 15px;
+                border: 2px solid #444;
+                border-radius: 6px;
+                background: #111;
+                color: #eee;
+               transition: 0.2s all;
+            }
+        
+            .param-grid input:focus {
+                border-color: #0ff; /* лёгкая подсветка при фокусе */
+                box-shadow: 0 0 6px #0ff66;
+                outline: none;
+                background: #222;
+            }
+        
+            button {
+                width: 100%;
+                font-size: 16px;
+                padding: 10px;
+                margin-top: 6px;
+                border-radius: 6px;
+            }
+        
+            .summary {
+                flex-direction: column;
+                gap: 8px;
+            }
+        
+            .table-wrapper {
+                overflow-x: auto;
+                padding: 4px 0;
+                margin-bottom: 10px;
+            }
+        
+            table {
+                font-size: 13px;
+                min-width: 400px; /* таблица будет скроллиться */
+            }
+        
+            .card {
+                padding: 16px;
+            }
+        
+            #martingaleChart {
+                max-height: 220px;
+                width: 100%;
+            }
+        
+            .balaclava-text {
+                font-size: 28px;
+                left: 50%;
+                transform: translateX(-50%) translateY(20%) rotate(10deg) skewY(-20deg);
+            }
+        
+            .social-buttons {
+                bottom: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                gap: 6px;
+            }
+
+            .social-buttons video {
+                width: 70px;
+                height: 70px;
+            }
+        
+            .theme-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
+
+        
+    </style>
+</head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="h1-wrapper" style="position: relative;">
+        <h1 data-text="Алгоритм распределения депозита">
+            Алгоритм распределения депозита
+        </h1>
+
+       <span class="balaclava-text" id="balaclavaText">
+           by Balaclava trade
+       </span>
+
+
+    </div>
+
+    <div class="card">
+        <h2>Параметры</h2>
+        <div class="param-grid">
+            <label>Сумма сделки:<input type="number" id="startBet" value="10"></label>
+            <label>Доходность (%):<input type="number" id="payout" value="80"></label>
+            <label>Шаг мартингейла:<input type="number" id="multiplier" value="2.25"></label>
+            <label>Депозит:<input type="number" id="bank" value="1000"></label>
+            <label>Кол-во ступеней:<input type="number" id="steps" value="5"></label>
+        </div>
+        <button id="calcBtn">Рассчитать</button>
+    </div>
+
+    <div class="card">
+        <h2>Итоги</h2>
+        <div class="summary">
+            <div><span>Суммарный риск</span><strong id="totalRisk">—</strong></div>
+            <div><span>Потенц. прибыль</span><strong id="profit">—</strong></div>
+            <div><span>(%) от депозита</span><strong id="load">—</strong></div>
+        </div>
+        <div id="riskWarning" class="risk-warning">⚠️ ВНИМАНИЕ: Высокий риск потери депозита</div>
+    </div>
+
+    <div class="card">
+        <h2>Ступени Мартингейла</h2>
+        <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Ступень</th>
+                    <th>Сделка</th>
+                    <th>Общая сумма сделки</th>
+                    <th>Потенц. прибыль</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>График</h2>
+        <canvas id="martingaleChart" style="max-height:300px;"></canvas>
+    </div>
+
+    <p><small>*Дисклеймер: калькулятор предназначен только для образовательных целей.</small></p>
+
+    <div class="theme-btn" id="themeBtn">Сменить тему</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <div class="social-buttons">
+        <a href="https://t.me/+Xsi6q_c6fjE1MGEy" target="_blank" class="hover-video">
+            <video src="media/tg.webm" muted playsinline preload="auto" loop></video>
+        </a>
+    
+        <a href="https://youtube.com/@balaclavatrade?si=wFo6qhwshYqBaPkU" target="_blank" class="hover-video">
+            <video src="media/yt.webm" muted playsinline preload="auto" loop></video>
+        </a>
+    </div>
+
+    <script>
+
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    // Функция для окрашивания числа в цвет
+    function colorize(el, value) {
+        el.classList.remove("profit", "loss", "neutral");
+        if (value > 0) el.classList.add("profit");
+        else if (value < 0) el.classList.add("loss");
+        else el.classList.add("neutral");
+    }
+
+    // Анимация чисел при изменении
+    function animateNumber(id, value, suffix = '') {
+        const el = document.getElementById(id);
+    
+        if (isMobile) {
+            // сразу выводим без анимации
+            el.innerText = suffix === '%' ? value.toFixed(1) + suffix : formatNumber(value) + suffix;
+            return; // выходим, анимация не нужна
+        }
+    
+        let start = 0,
+            duration = 900,
+            startTime = performance.now();
+    
+        function update(time) {
+            const progress = Math.min((time - startTime) / duration, 1);
+            const current = start + (value - start) * progress;
+            el.innerText = suffix === '%' ? current.toFixed(1) + suffix : formatNumber(current) + suffix;
+    
+            if (progress < 1) requestAnimationFrame(update);
+        }
+    
+        requestAnimationFrame(update);
+    }
+
+
+    // Форматирование числа
+    function formatNumber(num) {
+        if (typeof num !== 'number') return num;
+        return num.toLocaleString('ru-RU', { maximumFractionDigits: 2 });
+    }
+
+    let chartInstance = null;
+
+    // Рисование графика
+    function renderGraph(stepsArray, cumulativeLossArray, profitArray) {
+        const ctx = document.getElementById('martingaleChart').getContext('2d');
+
+        if (chartInstance) chartInstance.destroy();
+
+        const isAlt = document.body.classList.contains('alt-theme');
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: stepsArray,
+                datasets: [
+                    {
+                        label: 'Общая сумма сделки',
+                        data: cumulativeLossArray,
+                        borderColor: isAlt ? '#00ff00' : '#00ffff',
+                        backgroundColor: 'transparent',
+                        tension: 0.3,
+                        pointRadius: 5,
+                        borderWidth: 3,
+                        pointBackgroundColor: isAlt ? '#00ff00' : '#00ffff'
+                    },
+                    {
+                        label: 'Потенц. прибыль',
+                        data: profitArray,
+                        borderColor: isAlt ? '#ffff00' : '#9d00ff',
+                        backgroundColor: 'transparent',
+                        tension: 0.3,
+                        pointRadius: 5,
+                        borderWidth: 3,
+                        pointBackgroundColor: isAlt ? '#ffff00' : '#9d00ff'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    duration: 4000, // медленно за 2.5 секунды
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: isAlt ? '#b2ff59' : '#d9fbe5'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: isAlt ? '#b2ff59' : '#d9fbe5' },
+                        grid: {
+                            color: isAlt ? 'rgba(179,255,89,0.3)' : 'rgba(217,251,229,0.3)', // цвет сетки
+                            borderColor: isAlt ? '#33cc33' : '#00ffff', // цвет оси
+                            lineWidth: 1
+                        },
+                        title: { display: true, text: 'Ступень', color: isAlt ? '#b2ff59' : '#d9fbe5' }
+                    },
+                    y: {
+                        ticks: { color: isAlt ? '#b2ff59' : '#d9fbe5' },
+                        grid: {
+                            color: isAlt ? 'rgba(179,255,89,0.3)' : 'rgba(217,251,229,0.3)',
+                            borderColor: isAlt ? '#33cc33' : '#00ffff',
+                            lineWidth: 1
+                        },
+                        title: { display: true, text: 'Сумма', color: isAlt ? '#b2ff59' : '#d9fbe5' }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateChartColors() {
+        if (!chartInstance) return;
+
+        const data0 = chartInstance.data.datasets[0].data.slice();
+        const data1 = chartInstance.data.datasets[1].data.slice();
+        const labels = chartInstance.data.labels.slice();
+
+        renderGraph(labels, data0, data1);
+    }
+
+    // Основной расчёт
+    document.getElementById('calcBtn').addEventListener('click', function() {
+        const startBet = Number(document.getElementById('startBet').value);
+        const payout = Number(document.getElementById('payout').value) / 100;
+        const multiplier = Number(document.getElementById('multiplier').value);
+        const bank = Number(document.getElementById('bank').value);
+        const steps = Number(document.getElementById('steps').value);
+
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        let totalRisk = 0,
+            currentBet = startBet,
+            lastProfit = 0;
+
+        const stepsArray = [],
+              cumulativeLossArray = [],
+              profitArray = [];
+
+        for (let i = 1; i <= steps; i++) {
+            totalRisk += currentBet;
+            lastProfit = currentBet * payout - (totalRisk - currentBet);
+
+            const row = document.createElement('tr');
+            if (totalRisk > bank) row.classList.add('danger');
+
+            row.innerHTML = `
+                <td>${i}</td>
+                <td>${formatNumber(currentBet)}</td>
+                <td>${formatNumber(totalRisk)}</td>
+                <td>${formatNumber(lastProfit)}</td>
+            `;
+
+            tbody.appendChild(row);
+
+            stepsArray.push(i);
+            cumulativeLossArray.push(totalRisk);
+            profitArray.push(lastProfit);
+
+            currentBet *= multiplier;
+        }
+
+        animateNumber('totalRisk', totalRisk, '$');
+        animateNumber('profit', lastProfit, '$');
+        animateNumber('load', (totalRisk / bank) * 100, '%');
+
+        colorize(document.getElementById('profit'), lastProfit);
+
+        const warning = document.getElementById('riskWarning');
+        if ((totalRisk / bank) * 100 >= 80) warning.classList.add('show');
+        else warning.classList.remove('show');
+
+        renderGraph(stepsArray, cumulativeLossArray, profitArray);
+    });
+
+    // Смена темы
+    document.getElementById('themeBtn').addEventListener('click', () => {
+        document.body.classList.toggle('alt-theme');
+        updateChartColors();
+    });
+
+    // === Частицы на фоне с относительными координатами ===
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+    
+    window.addEventListener('resize', () => {
+        const scaleX = window.innerWidth / w;
+        const scaleY = window.innerHeight / h;
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+    
+        // масштабируем координаты частиц при изменении размеров
+        for (let p of particles) {
+            p.x *= scaleX;
+            p.y *= scaleY;
+        }
+    });
+    
+    let mouseOnBackground = true;
+    const mouse = { x: w / 2, y: h / 2 };
+    
+    window.addEventListener('mousemove', e => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        mouseOnBackground = el ? !el.closest('.card') && !el.closest('.theme-btn') : true;
+    });
+    
+    const particleCount = isMobile ? 40 : 90;
+    const particles = [];
+    
+    // создаем частицы с координатами в пикселях
+    for (let i = 0; i < particleCount; i++) {
+        particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            size: Math.random() * 16 + 10,
+            dx: (Math.random() - 0.5) * 0.5, // скорость в пикселях
+            dy: (Math.random() - 0.5) * 0.5,
+            angle: Math.random() * Math.PI * 2,
+            da: (Math.random() - 0.5) * 0.04,
+            alpha: Math.random() * 0.5 + 0.5,
+            flicker: Math.random() * 1200
+        });
+    }
+    
+    function drawParticles() {
+        ctx.clearRect(0, 0, w, h);
+        const isAlt = document.body.classList.contains('alt-theme');
+        const symbol = isAlt ? '$' : '₿';
+    
+        for (let p of particles) {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle);
+            ctx.globalAlpha = p.alpha + 0.4 * Math.sin(Date.now() / p.flicker);
+    
+            ctx.font = `bold ${p.size}px 'Orbitron', 'Segoe UI', Arial`;
+    
+            const grad = ctx.createLinearGradient(0, -p.size, 0, p.size);
+            grad.addColorStop(0, '#fff6c3');
+            grad.addColorStop(0.4, '#ffcc00');
+            grad.addColorStop(1, '#b8860b');
+    
+            ctx.shadowColor = isAlt ? '#00ff88' : '#ffcc00';
+            ctx.shadowBlur = 15;
+    
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.fillText(symbol, 2, 2);
+    
+            ctx.fillStyle = grad;
+            ctx.fillText(symbol, 0, 0);
+    
+            ctx.shadowBlur = 0;
+            ctx.restore();
+    
+            // Влияние мыши
+            const radius = 120 + Math.sin(Date.now() / 500) * 10;
+            const dxm = mouse.x - p.x;
+            const dym = mouse.y - p.y;
+            const dist = Math.sqrt(dxm * dxm + dym * dym);
+    
+            if (mouseOnBackground && dist < radius) {
+               const force = (radius - dist) / radius * 0.05; // сила отталкивания
+                p.dx -= dxm * force / radius;
+                p.dy -= dym * force / radius;
+            }
+    
+            // обновление позиции
+            p.x += p.dx;
+            p.y += p.dy;
+            p.angle += p.da;
+    
+            // отражение от границ
+            if (p.x < 0 || p.x > w) p.dx *= -1;
+            if (p.y < 0 || p.y > h) p.dy *= -1;
+        }
+    
+        requestAnimationFrame(drawParticles);
+    }
+    
+    drawParticles();
+
+    
+    const balaclavaText = document.querySelector('.balaclava-text');
+
+    // Разбиваем текст на буквы, сохраняя пробелы
+    balaclavaText.innerHTML = balaclavaText.textContent
+        .split('')
+        .map(c => c === ' ' ? ' ' : `<span>${c}</span>`)
+        .join('');
+    
+    const letters = balaclavaText.querySelectorAll('span');
+    
+    // Настройки букв
+    const letterSettings = Array.from(letters).map(() => ({
+        flickerDelay: Math.random() * 4000 + 1000  // 1–5 секунд между вспышками
+    }));
+    
+    let lastLetterFlicker = Array(letters.length).fill(0);
+    let lastPhraseFlicker = 0;
+    
+    function updateNeon(time = 0) {
+        const now = performance.now();
+    
+        // Мерцание всей фразы (медленно)
+        if (now - lastPhraseFlicker > 1500) {  // каждые ~1.5 секунды шанс потускнеть
+            const phraseFlicker = Math.random();
+            if (phraseFlicker < 0.25) {  // 20% шанс погаснуть
+                balaclavaText.style.opacity = 0.4; // гаснет
+                balaclavaText.style.textShadow = '';
+
+                setTimeout(() => {
+                    balaclavaText.style.opacity = 1; // через 150 мс включаем обратно
+                    balaclavaText.style.textShadow = '0 0 2px #fff, 0 0 6px #ff66ff, 0 0 12px #cc66ff, 0 0 18px #ff00ff';
+                }, 100);
+            } else {
+                balaclavaText.style.opacity = 1;
+                balaclavaText.style.textShadow = '0 0 2px #fff, 0 0 6px #ff66ff, 0 0 12px #cc66ff, 0 0 18px #ff00ff';
+            }
+
+            lastPhraseFlicker = now;
+        }
+    
+        // Случайное мерцание букв
+        letters.forEach((letter, i) => {
+            if (now - lastLetterFlicker[i] > letterSettings[i].flickerDelay) {
+                const flicker = Math.random();
+                if (flicker < 0.10) {  // 10% шанс потускнеть
+                    letter.style.opacity = 0.4;
+                    letter.style.textShadow = '';
+                } else {
+                    letter.style.opacity = 1;
+                    letter.style.textShadow = '0 0 2px #fff, 0 0 6px #ff66ff, 0 0 12px #cc66ff, 0 0 18px #ff00ff';
+                }
+                lastLetterFlicker[i] = now;
+            }
+        });
+    
+        requestAnimationFrame(updateNeon);
+    }
+    
+    updateNeon();
+
+    // === WebM hover play ===
+    document.querySelectorAll('.hover-video').forEach(link => {
+        const video = link.querySelector('video');
+        let forward = true;
+        let mirrorInterval = null;
+    
+        // Наведение мыши
+        link.addEventListener('mouseenter', () => {
+            // Масштабирование и яркость
+            video.style.transition = 'transform 0.2s, filter 0.2s';
+            video.style.transform = 'scale(1.1)';
+            video.style.filter = 'brightness(1.2)';
+    
+            // Запуск видео
+            video.currentTime = 0;
+            video.playbackRate = 2;
+            video.play();
+    
+            // Зеркалирование каждые 5 секунд
+            mirrorInterval = setInterval(() => {
+                forward = !forward;
+                video.style.transform = forward ? 'scale(1.1) scaleX(1)' : 'scale(1.1) scaleX(-1)';
+            }, 5000 / video.playbackRate);
+        });
+    
+        // Уход мыши
+        link.addEventListener('mouseleave', () => {
+            // Возврат к исходным стилям
+            video.style.transform = 'scale(1) scaleX(1)';
+            video.style.filter = 'brightness(1)';
+    
+            video.pause();
+            if (mirrorInterval) {
+                clearInterval(mirrorInterval);
+                mirrorInterval = null;
+            }
+            forward = true;
+        });
+    });
+    
+    // Функция для запуска всех видео-кнопок
+    function playSocialVideosOnMobile() {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+        if (!isMobile) return; // На ПК ничего не трогаем
+    
+        document.querySelectorAll('.social-buttons video').forEach(video => {
+            // Пробуем сразу, если блокируется — ждём первого касания
+            video.play().catch(() => {
+                document.body.addEventListener('click', () => video.play(), { once: true });
+            });
+    
+            // Ещё один страховочный запуск через 1 секунду
+            setTimeout(() => video.play().catch(() => {}), 1000);
+        });
+    }
+    
+    // Запуск
+    playSocialVideosOnMobile();
+
+
+</script>
+</body>
+</html>
