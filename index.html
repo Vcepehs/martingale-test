@@ -811,7 +811,7 @@
 
     <script>
 
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isMobile = window.matchMedia('(pointer: coarse)').matches;
 
     // Функция для окрашивания числа в цвет
     function colorize(el, value) {
@@ -1078,8 +1078,15 @@
             ctx.restore();
         }
     }
+
+    let animationBlocked = false;
+
+    if (isMobile) {
+        animationBlocked = true;
+    }
     
     function drawParticles() {
+        if (animationBlocked) return;
         if (isMobile) return; // ⛔ мобилка — анимация запрещена
         ctx.clearRect(0, 0, w, h);
         const isAlt = document.body.classList.contains('alt-theme');
@@ -1244,7 +1251,7 @@
     
     // Функция для запуска всех видео-кнопок
     function playSocialVideosOnMobile() {
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const isMobile = window.matchMedia('(pointer: coarse)').matches;
     
         if (!isMobile) return; // На ПК ничего не трогаем
     
