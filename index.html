@@ -1088,22 +1088,42 @@
     
     function drawParticles() {
         if (isMobile || particles.length === 0) return;
-    
+
         ctx.clearRect(0, 0, w, h);
-    
+
         const isAlt = document.body.classList.contains('alt-theme');
         const symbol = isAlt ? '$' : '₿';
         const time = performance.now();
+
+        // Настройки притяжения
+        const attractionRadius = 100;    // радиус действия мыши
+        const attractionStrength = 0.01; // сила притяжения
 
         for (let p of particles) {
             // Размер с лёгкой пульсацией
             const size = p.baseSize + Math.sin(time / 600 + p.flicker) * 2;
 
+            // Притяжение к мышке только если мышь на фоне
+            if (mouseOnBackground) {
+                const dx = mouse.x - p.x;
+                const dy = mouse.y - p.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+
+                if (dist < attractionRadius) {
+                    p.dx += (dx / dist) * attractionStrength;
+                    p.dy += (dy / dist) * attractionStrength;
+                }
+            }
+
+            // Лёгкое затухание скорости, чтобы частицы не разгонялись слишком
+            p.dx *= 0.98;
+            p.dy *= 0.98;
+
             // Двигаем частицу
             p.x += p.dx;
             p.y += p.dy;
             p.angle += p.da;
-
+    
             // Отскок от краёв
             if (p.x < 0 || p.x > w) p.dx *= -1;
             if (p.y < 0 || p.y > h) p.dy *= -1;
@@ -1112,16 +1132,20 @@
             ctx.save();
             ctx.globalAlpha = p.alpha;
             ctx.font = `bold ${size}px 'Orbitron', Arial, sans-serif`;
-            ctx.shadowColor = isAlt ? '#00ff88' : '#ffcc00';
-            ctx.shadowBlur = size * 0.6;
-            ctx.fillStyle = isAlt ? '#00ff88' : '#ffcc00';
-            ctx.fillText(symbol, p.x, p.y);
+            ctx.shadowColor = isAlt ? '#00ff88' : '#ff00ff'; // старые цвета
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = isAlt ? '#00ff88' : '#ff00ff';
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle);
+            ctx.fillText(symbol, 0, 0);
             ctx.restore();
         }
 
         requestAnimationFrame(drawParticles);
     }
-    drawParticles(); // запускаем анимацию
+
+    drawParticles();
+
 
 
     
