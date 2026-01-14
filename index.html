@@ -733,11 +733,38 @@
                 padding: 8px 12px;
                 font-size: 13px;
             }
+
+            #martingale-pdf {
+                background: #0b0f14;
+                padding: 20px;
+                color: #eafff4;
+            }
+
+            #martingale-pdf table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            
+            #martingale-pdf th {
+                background: #101820;
+                color: #00ff88;
+                padding: 8px;
+            }
+
+            #martingale-pdf td {
+                padding: 6px 8px;
+                border-bottom: 1px solid #1f2a33;
+            }
+
+            
         }
 
         
     </style>
 </head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <body>
     <canvas id="particleCanvas"></canvas>
 
@@ -763,6 +790,7 @@
             <label>Кол-во ступеней:<input type="number" id="steps" value="5"></label>
         </div>
         <button id="calcBtn">Рассчитать</button>
+        <button id="savePdfBtn">Сохранить в PDF</button>
     </div>
 
     <div class="card">
@@ -776,7 +804,8 @@
     </div>
 
     <div class="card">
-        <h2>Ступени Мартингейла</h2>
+        <div id="martingale-pdf">
+        <h2>Ступени</h2>
         <div class="table-wrapper">
         <table>
             <thead>
@@ -789,6 +818,7 @@
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
+        </div>
         </div>
     </div>
 
@@ -816,6 +846,60 @@
     <script>
 
     const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+
+    document.getElementById('savePdfBtn').addEventListener('click', saveMartingalePDF);
+
+    // Функция сохранения таблицы
+    async function saveMartingalePDF() {
+        const { jsPDF } = window.jspdf;
+        const element = document.getElementById('martingale-pdf');
+    
+        if (!element) {
+            alert('Таблица не найдена');
+            return;
+        }
+
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            backgroundColor: '#0b0f14',
+            useCORS: true
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        const margin = 10;
+        const imgWidth = pageWidth - margin * 2;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        let y = margin;
+        let remainingHeight = imgHeight;
+        let position = 0;
+
+        while (remainingHeight > 0) {
+            pdf.addImage(
+                imgData,
+                'PNG',
+                margin,
+                y - position,
+                imgWidth,
+                imgHeight
+            );
+
+            remainingHeight -= pageHeight - margin * 2;
+            position += pageHeight - margin * 2;
+
+            if (remainingHeight > 0) {
+                pdf.addPage();
+            }
+        }
+
+        pdf.save('martingale-steps.pdf');
+    }
+
 
     // Функция для окрашивания числа в цвет
     function colorize(el, value) {
@@ -1109,9 +1193,10 @@
                 const dy = mouse.y - p.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
 
-                if (dist < attractionRadius) {
-                    p.dx += (dx / dist) * attractionStrength;
-                    p.dy += (dy / dist) * attractionStrength;
+                if (dist > 0.01 && dist < attractionRadius) {
+                    const force = (1 - dist / attractionRadius) * attractionStrength;
+                    p.dx += (dx / dist) * force;
+                    p.dy += (dy / dist) * force;
                 }
             }
 
@@ -1125,8 +1210,13 @@
             p.angle += p.da;
     
             // Отскок от краёв
-            if (p.x < 0 || p.x > w) p.dx *= -1;
-            if (p.y < 0 || p.y > h) p.dy *= -1;
+            const margin = 20;
+
+            if (p.x < -margin) p.x = w + margin;
+            if (p.x > w + margin) p.x = -margin;
+
+            if (p.y < -margin) p.y = h + margin;
+            if (p.y > h + margin) p.y = -margin;
 
             // Рисуем символ
             ctx.save();
@@ -1145,9 +1235,6 @@
     }
 
     drawParticles();
-
-
-
     
     const balaclavaText = document.querySelector('.balaclava-text');
 
