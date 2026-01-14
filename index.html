@@ -1002,21 +1002,30 @@
     const canvas = document.getElementById('particleCanvas');
     const ctx = canvas.getContext('2d');
     
-    let w = canvas.width = window.innerWidth;
-    let h = canvas.height = window.innerHeight;
+    let w, h, dpr;
+
+    function resizeCanvas() {
+        dpr = window.devicePixelRatio || 1;
     
-    window.addEventListener('resize', () => {
-        const scaleX = window.innerWidth / w;
-        const scaleY = window.innerHeight / h;
-        w = canvas.width = window.innerWidth;
-        h = canvas.height = window.innerHeight;
+        const cssWidth = window.innerWidth;
+        const cssHeight = window.innerHeight;
     
-        // масштабируем координаты частиц при изменении размеров
-        for (let p of particles) {
-            p.x *= scaleX;
-            p.y *= scaleY;
-        }
-    });
+        canvas.style.width = cssWidth + 'px';
+        canvas.style.height = cssHeight + 'px';
+
+        canvas.width = Math.floor(cssWidth * dpr);
+        canvas.height = Math.floor(cssHeight * dpr);
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        w = cssWidth;
+        h = cssHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+
     
     let mouseOnBackground = true;
     const mouse = { x: w / 2, y: h / 2 };
@@ -1064,7 +1073,7 @@
             ctx.font = `bold ${p.size}px 'Orbitron', 'Segoe UI', Arial`;
         
             ctx.shadowColor = isAlt ? '#00ff88' : '#ffcc00';
-            ctx.shadowBlur = isMobile ? 35 : 15;
+            ctx.shadowBlur = (isMobile ? 35 : 15) * dpr;
         
             const gradGlow = ctx.createLinearGradient(
                 p.x, p.y - p.size,
