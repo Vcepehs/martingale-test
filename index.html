@@ -181,7 +181,6 @@
             box-shadow: 0 0 20px var(--neon-blue), inset 0 0 8px var(--neon-purple);
             animation: cardFade 0.6s ease both;
             transition: background 0.5s, color 0.5s, box-shadow 0.5s;
-            border-radius: 18px;
             overflow: hidden;  /* тень больше не торчит */
         }
 
@@ -632,6 +631,11 @@
 
         /* === Ультра-мобильная адаптация === */
         @media (max-width: 480px) {
+            #particleCanvas {
+                display: none !important;
+            }
+
+
             body {
                 padding: 12px;
                 font-size: 14px;
@@ -811,7 +815,7 @@
 
     <script>
 
-    const isMobile = window.matchMedia('(pointer: coarse)').matches;
+    const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
 
     // Функция для окрашивания числа в цвет
     function colorize(el, value) {
@@ -1004,6 +1008,8 @@
     
     let w, h, dpr;
 
+    const particles = [];
+
     function resizeCanvas() {
         dpr = window.devicePixelRatio || 1;
 
@@ -1013,11 +1019,56 @@
         canvas.style.width = window.innerWidth + 'px';
         canvas.style.height = window.innerHeight + 'px';
 
-        ctx.setTransform(1, 0, 0, 1, 0, 0); // сбрасываем трансформацию
-        ctx.scale(dpr, dpr); // масштабируем только once
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+
         w = window.innerWidth;
         h = window.innerHeight;
+
+        // Обновляем нормализованные координаты частиц
+        particles.forEach(p => {
+            p.x = p.xNorm * w;
+            p.y = p.yNorm * h;
+        });
     }
+
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        initParticles(); // пересоздаём частицы под новые размеры
+    });
+    
+    resizeCanvas();
+    initParticles(); // создаём частицы при первой загрузке
+
+
+    function initParticles() {
+        if (isMobile) return;
+
+        const particleCount = 60;
+        particles.length = 0; // очищаем массив на всякий случай
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                baseSize: Math.random() * 16 + 10,
+                dx: (Math.random() - 0.5) * 0.5,
+                dy: (Math.random() - 0.5) * 0.5,
+                da: (Math.random() - 0.5) * 0.04,
+                angle: Math.random() * Math.PI * 2,
+                alpha: Math.random() * 0.5 + 0.5,
+                flicker: Math.random() * 1200,
+                xNorm: 0,
+                yNorm: 0
+            });
+        }
+    
+        particles.forEach(p => {
+            p.xNorm = p.x / w;
+            p.yNorm = p.y / h;
+        });
+    }
+
 
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
@@ -1033,117 +1084,44 @@
         const el = document.elementFromPoint(e.clientX, e.clientY);
         mouseOnBackground = el ? !el.closest('.card') && !el.closest('.theme-btn') : true;
     });
-    
-    const particleCount = isMobile ? 12 : 60;
-    const particles = [];
-    
-    // создаем частицы с координатами в пикселях
-    for (let i = 0; i < particleCount; i++) {
-        particles.push({
-             x: Math.random() * w,
-             y: Math.random() * h,
-
-             baseSize: isMobile
-                 ? Math.random() * 40 + 40   // 📱 крупные
-                 : Math.random() * 16 + 10,  // 🖥 обычные
-             dx: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.5),
-             dy: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.5),
-             da: (Math.random() - 0.5) * (isMobile ? 0.015 : 0.04),
-
-             angle: Math.random() * Math.PI * 2,
-             alpha: Math.random() * 0.5 + 0.5,
-             flicker: Math.random() * 1200
-        });
-    }
-
-    particles.forEach(p => {
-        p.xNorm = p.x / w; // 0…1 относительно исходного размера
-        p.yNorm = p.y / h;
-    });
+   
     
     function drawParticles() {
+        if (isMobile || particles.length === 0) return;
+    
         ctx.clearRect(0, 0, w, h);
-
+    
         const isAlt = document.body.classList.contains('alt-theme');
         const symbol = isAlt ? '$' : '₿';
-
         const time = performance.now();
 
         for (let p of particles) {
-            // === 1. Размер с лёгкой пульсацией ===
-            const size =
-                p.baseSize +
-                Math.sin(performance.now() / 600 + p.flicker) * 2;
+            // Размер с лёгкой пульсацией
+            const size = p.baseSize + Math.sin(time / 600 + p.flicker) * 2;
 
-            const px = p.xNorm * w;
-            const py = p.yNorm * h;
-
-            // === 2. Свечение (без вращения) ===
-            ctx.save();
-                    ctx.globalAlpha = p.alpha;
-
-            ctx.font = `bold ${size}px 'Orbitron', 'Segoe UI', Arial`;
-            ctx.shadowColor = isAlt ? '#00ff88' : '#ffcc00';
-            ctx.shadowBlur = size * 0.6;
-
-            const gradGlow = ctx.createLinearGradient(
-                p.xNorm * w, p.yNorm * h - size,
-                p.xNorm * w, p.yNorm * h + size
-            );
-            gradGlow.addColorStop(0, '#fff6c3');
-            gradGlow.addColorStop(0.5, '#ffcc00');
-            gradGlow.addColorStop(1, '#b8860b');
-
-            ctx.fillStyle = gradGlow;
-            ctx.fillText(symbol, p.xNorm * w, p.yNorm * h);
-            ctx.restore();
-
-            // === 3. Символ с вращением ===
-            ctx.save();
-            const px = p.xNorm * w;
-            const py = p.yNorm * h;
-            ctx.translate(px, py);
-            ctx.rotate(p.angle);
-
-            ctx.globalAlpha =
-                p.alpha + 0.4 * Math.sin(performance.now() / p.flicker);
-
-            ctx.font = `bold ${size}px 'Orbitron', 'Segoe UI', Arial`;
-            ctx.fillStyle = '#ffcc00';
-            ctx.fillText(symbol, 0, 0);
-
-            ctx.restore();
-
-            // === 4. Движение частицы ===
-            p.xNorm += p.dx / w;
-            p.yNorm += p.dy / h;
+            // Двигаем частицу
+            p.x += p.dx;
+            p.y += p.dy;
             p.angle += p.da;
 
-            if (p.xNorm < 0 || p.xNorm > 1) p.dx *= -1;
-            if (p.yNorm < 0 || p.yNorm > 1) p.dy *= -1;
-
-            // Отражение от границ
+            // Отскок от краёв
             if (p.x < 0 || p.x > w) p.dx *= -1;
             if (p.y < 0 || p.y > h) p.dy *= -1;
 
-           // === 4. ВЛИЯНИЕ МЫШИ === 
-
-           const radius = 120 + Math.sin(performance.now() / 500) * 10; 
-           const dxm = mouse.x - p.x; 
-           const dym = mouse.y - p.y; 
-           const dist = Math.hypot(dxm, dym);
-
-           if (mouseOnBackground && dist < radius) {
-               const force = (radius - dist) / radius * 0.05;
-                p.dx -= dxm * force / radius;
-                p.dy -= dym * force / radius;
-           }
+            // Рисуем символ
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.font = `bold ${size}px 'Orbitron', Arial, sans-serif`;
+            ctx.shadowColor = isAlt ? '#00ff88' : '#ffcc00';
+            ctx.shadowBlur = size * 0.6;
+            ctx.fillStyle = isAlt ? '#00ff88' : '#ffcc00';
+            ctx.fillText(symbol, p.x, p.y);
+            ctx.restore();
         }
 
         requestAnimationFrame(drawParticles);
     }
-
-    drawParticles();
+    drawParticles(); // запускаем анимацию
 
 
     
