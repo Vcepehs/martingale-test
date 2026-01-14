@@ -1028,7 +1028,7 @@
         mouseOnBackground = el ? !el.closest('.card') && !el.closest('.theme-btn') : true;
     });
     
-    const particleCount = isMobile ? 10 : 90;
+    const particleCount = isMobile ? 12 : 90;
     const particles = [];
     
     // создаем частицы с координатами в пикселях
@@ -1037,7 +1037,7 @@
             x: Math.random() * w,
                 y: Math.random() * h,
                 size: isMobile
-                    ? Math.random() * 24 + 26   // 📱 крупные
+                    ? Math.random() * 40 + 40   // 📱 крупные
                     : Math.random() * 16 + 10,  // 🖥 обычные
                 dx: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.5),
                 dy: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.5),
@@ -1047,39 +1047,6 @@
                 flicker: Math.random() * 1200
         });
     }
-
-    function drawStaticParticles() {
-        ctx.clearRect(0, 0, w, h);
-        const isAlt = document.body.classList.contains('alt-theme');
-        const symbol = isAlt ? '$' : '₿';
-    
-        for (let p of particles) {
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(p.angle);
-    
-            ctx.globalAlpha = p.alpha;
-
-            ctx.font = `bold ${p.size}px 'Orbitron', 'Segoe UI', Arial`;
-
-            const grad = ctx.createLinearGradient(0, -p.size, 0, p.size);
-            grad.addColorStop(0, '#fff6c3');
-            grad.addColorStop(0.4, '#ffcc00');
-            grad.addColorStop(1, '#b8860b');
-
-            ctx.shadowColor = isAlt ? '#00ff88' : '#ffcc00';
-            ctx.shadowBlur = 15;
-
-            ctx.fillStyle = 'rgba(0,0,0,0.35)';
-            ctx.fillText(symbol, 2, 2);
-
-            ctx.fillStyle = grad;
-            ctx.fillText(symbol, 0, 0);
-
-            ctx.shadowBlur = 0;
-            ctx.restore();
-        }
-    }
     
     function drawParticles() {
         ctx.clearRect(0, 0, w, h);
@@ -1087,30 +1054,53 @@
         const symbol = isAlt ? '$' : '₿';
     
         for (let p of particles) {
+
+            const isAlt = document.body.classList.contains('alt-theme');
+            const symbol = isAlt ? '$' : '₿';
+        
+            // === 1. СВЕЧЕНИЕ (БЕЗ ПОВОРОТА) ===
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.font = `bold ${p.size}px 'Orbitron', 'Segoe UI', Arial`;
+        
+            ctx.shadowColor = isAlt ? '#00ff88' : '#ffcc00';
+            ctx.shadowBlur = isMobile ? 35 : 15;
+        
+            const gradGlow = ctx.createLinearGradient(
+                p.x, p.y - p.size,
+                p.x, p.y + p.size
+            );
+            gradGlow.addColorStop(0, '#fff6c3');
+            gradGlow.addColorStop(0.5, '#ffcc00');
+            gradGlow.addColorStop(1, '#b8860b');
+        
+            ctx.fillStyle = gradGlow;
+            ctx.fillText(symbol, p.x, p.y);
+            ctx.restore();
+        
+        
+            // === 2. САМ СИМВОЛ (С ПОВОРОТОМ) ===
             ctx.save();
             ctx.translate(p.x, p.y);
             ctx.rotate(p.angle);
+        
             ctx.globalAlpha = p.alpha + 0.4 * Math.sin(Date.now() / p.flicker);
-    
             ctx.font = `bold ${p.size}px 'Orbitron', 'Segoe UI', Arial`;
-    
-            const grad = ctx.createLinearGradient(0, -p.size, 0, p.size);
-            grad.addColorStop(0, '#fff6c3');
-            grad.addColorStop(0.4, '#ffcc00');
-            grad.addColorStop(1, '#b8860b');
-    
-            ctx.shadowColor = isAlt ? '#00ff88' : '#ffcc00';
-            ctx.shadowBlur = 15;
-    
-            ctx.fillStyle = 'rgba(0,0,0,0.35)';
-            ctx.fillText(symbol, 2, 2);
-    
-            ctx.fillStyle = grad;
+        
+            ctx.fillStyle = '#ffcc00';
             ctx.fillText(symbol, 0, 0);
-    
-            ctx.shadowBlur = 0;
+        
             ctx.restore();
-    
+
+        
+            // === 3. ДВИЖЕНИЕ ===
+            p.x += p.dx;
+            p.y += p.dy;
+            p.angle += p.da;
+
+            if (p.x < 0 || p.x > w) p.dx *= -1;
+            if (p.y < 0 || p.y > h) p.dy *= -1;
+
             // Влияние мыши
             const radius = 120 + Math.sin(Date.now() / 500) * 10;
             const dxm = mouse.x - p.x;
@@ -1122,15 +1112,6 @@
                 p.dx -= dxm * force / radius;
                 p.dy -= dym * force / radius;
             }
-    
-            // обновление позиции
-            p.x += p.dx;
-            p.y += p.dy;
-            p.angle += p.da;
-    
-            // отражение от границ
-            if (p.x < 0 || p.x > w) p.dx *= -1;
-            if (p.y < 0 || p.y > h) p.dy *= -1;
         }
     
         requestAnimationFrame(drawParticles);
