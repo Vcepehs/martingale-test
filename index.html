@@ -1028,7 +1028,7 @@
         mouseOnBackground = el ? !el.closest('.card') && !el.closest('.theme-btn') : true;
     });
     
-    const particleCount = isMobile ? 40 : 90;
+    const particleCount = isMobile ? 10 : 90;
     const particles = [];
     
     // создаем частицы с координатами в пикселях
@@ -1036,11 +1036,13 @@
         particles.push({
             x: Math.random() * w,
                 y: Math.random() * h,
-                size: Math.random() * 16 + 10,
-                dx: isMobile ? 0 : (Math.random() - 0.5) * 0.5,
-                dy: isMobile ? 0 : (Math.random() - 0.5) * 0.5,
+                size: isMobile
+                    ? Math.random() * 24 + 26   // 📱 крупные
+                    : Math.random() * 16 + 10,  // 🖥 обычные
+                dx: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.5),
+                dy: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.5),
+                da: (Math.random() - 0.5) * (isMobile ? 0.015 : 0.04),
                 angle: Math.random() * Math.PI * 2,
-                da: isMobile ? 0 : (Math.random() - 0.5) * 0.04,
                 alpha: Math.random() * 0.5 + 0.5,
                 flicker: Math.random() * 1200
         });
@@ -1078,16 +1080,8 @@
             ctx.restore();
         }
     }
-
-    let animationBlocked = false;
-
-    if (isMobile) {
-        animationBlocked = true;
-    }
     
     function drawParticles() {
-        if (animationBlocked) return;
-        if (isMobile) return; // ⛔ мобилка — анимация запрещена
         ctx.clearRect(0, 0, w, h);
         const isAlt = document.body.classList.contains('alt-theme');
         const symbol = isAlt ? '$' : '₿';
@@ -1142,11 +1136,7 @@
         requestAnimationFrame(drawParticles);
     }
     
-    if (isMobile) {
-        drawStaticParticles(); // 📱 один раз нарисовали — и всё
-    } else {
-        drawParticles();       // 🖥 ПК — полная анимация
-    }
+    drawParticles();       // 🖥 ПК — полная анимация
 
     
     const balaclavaText = document.querySelector('.balaclava-text');
