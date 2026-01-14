@@ -1055,6 +1055,11 @@
              flicker: Math.random() * 1200
         });
     }
+
+    particles.forEach(p => {
+        p.xNorm = p.x / w;
+        p.yNorm = p.y / h;
+    });
     
     function drawParticles() {
         ctx.clearRect(0, 0, w, h);
@@ -1066,40 +1071,51 @@
 
         for (let p of particles) {
             // === 1. Размер с лёгкой пульсацией ===
-            const size = p.baseSize + Math.sin(time / 600 + p.flicker) * 2;
+            const size = p.baseSize + Math.sin(performance.now() / 600 + p.flicker) * 2;
 
             // === 2. Свечение (без вращения) ===
             ctx.save();
-            ctx.globalAlpha = Math.min(Math.max(p.alpha, 0.4), 1);
+                    ctx.globalAlpha = p.alpha;
 
             ctx.font = `bold ${size}px 'Orbitron', 'Segoe UI', Arial`;
             ctx.shadowColor = isAlt ? '#00ff88' : '#ffcc00';
             ctx.shadowBlur = size * 0.6;
 
-            const gradGlow = ctx.createLinearGradient(p.x, p.y - size, p.x, p.y + size);
-            gradGlow.addColorStop(0, isAlt ? '#ccffcc' : '#fff6c3');
-            gradGlow.addColorStop(0.5, isAlt ? '#66ff66' : '#ffcc00');
-            gradGlow.addColorStop(1, isAlt ? '#33aa33' : '#b8860b');
+            const gradGlow = ctx.createLinearGradient(
+                p.xNorm * w, p.yNorm * h - size,
+                p.xNorm * w, p.yNorm * h + size
+            );
+            gradGlow.addColorStop(0, '#fff6c3');
+            gradGlow.addColorStop(0.5, '#ffcc00');
+            gradGlow.addColorStop(1, '#b8860b');
 
             ctx.fillStyle = gradGlow;
-            ctx.fillText(symbol, p.x, p.y);
+            ctx.fillText(symbol, p.xNorm * w, p.yNorm * h);
             ctx.restore();
 
             // === 3. Символ с вращением ===
             ctx.save();
-            ctx.translate(p.x, p.y);
+            const px = p.xNorm * w;
+            const py = p.yNorm * h;
+            ctx.translate(px, py);
             ctx.rotate(p.angle);
-            ctx.globalAlpha = Math.min(Math.max(p.alpha + 0.3 * Math.sin(time / p.flicker), 0.2), 1);
+
+            ctx.globalAlpha =
+                p.alpha + 0.4 * Math.sin(performance.now() / p.flicker);
 
             ctx.font = `bold ${size}px 'Orbitron', 'Segoe UI', Arial`;
-            ctx.fillStyle = isAlt ? '#00ff88' : '#ffcc00';
+            ctx.fillStyle = '#ffcc00';
             ctx.fillText(symbol, 0, 0);
+
             ctx.restore();
 
             // === 4. Движение частицы ===
-            p.x += p.dx;
-            p.y += p.dy;
+            p.xNorm += p.dx / w;
+            p.yNorm += p.dy / h;
             p.angle += p.da;
+
+            if (p.xNorm < 0 || p.xNorm > 1) p.dx *= -1;
+            if (p.yNorm < 0 || p.yNorm > 1) p.dy *= -1;
 
             // Отражение от границ
             if (p.x < 0 || p.x > w) p.dx *= -1;
@@ -1112,11 +1128,11 @@
            const dym = mouse.y - p.y; 
            const dist = Math.hypot(dxm, dym);
 
-            if (mouseOnBackground && dist < radius && dist > 0) {
-                const force = ((radius - dist) / radius) * 0.05;
-                p.dx -= (dxm / dist) * force;
-                p.dy -= (dym / dist) * force;
-            }
+           if (mouseOnBackground && dist < radius) {
+               const force = (radius - dist) / radius * 0.05;
+                p.dx -= dxm * force / radius;
+                p.dy -= dym * force / radius;
+           }
         }
 
         requestAnimationFrame(drawParticles);
