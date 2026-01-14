@@ -759,51 +759,52 @@
             
         }
 
-        /* === Мобильный фон === */
+        
+        /* === Мобильный фон: киберпанк с плавающими орбами === */
         @media (max-width: 480px) {
 
+            /* Отключаем ПК-градиент и анимацию body */
             body {
-                background: none;
+                background: none !important;
+                animation: none !important;
+                padding: 12px;
+                font-size: 14px;
             }
 
+            /* Фон для мобильных */
             .mobile-bg {
                 position: fixed;
                 inset: 0;
                 z-index: -1;
-                background: linear-gradient(
-                    135deg,
-                    #05080f,
-                    #0b1d2e,
-                    #120b2e,
-                    #001a14
-                );
+                background: linear-gradient(-45deg, #0b0f17, #1a0a2a, #3b0066, #ff0080);
                 background-size: 400% 400%;
-                animation: none;
+                animation: mobileGradient 15s ease infinite;
                 overflow: hidden;
             }
 
+            /* Плавающие орбы */
             .mobile-bg::before,
             .mobile-bg::after {
                 content: '';
                 position: absolute;
-                width: 280px;
-                height: 280px;
+                width: 220px;
+                height: 220px;
                 border-radius: 50%;
-                filter: blur(90px);
-                opacity: 0.55;
+                filter: blur(100px);
+                opacity: 0.5;
                 animation: floatOrb 16s ease-in-out infinite;
             }
 
             .mobile-bg::before {
                 background: #00ffff;
-                top: 15%;
-                left: -60px;
+                top: 10%;
+                left: -50px;
             }
-
+        
             .mobile-bg::after {
                 background: #ff00ff;
-                bottom: 10%;
-                right: -60px;
+                bottom: 15%;
+                right: -50px;
                 animation-delay: -8s;
             }
 
@@ -812,12 +813,15 @@
                 50% { background-position: 100% 50%; }
                 100% { background-position: 0% 50%; }
             }
-        
+
             @keyframes floatOrb {
-                0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(-60px); }
+                0%, 100% { transform: translateY(0) translateX(0); }
+                25% { transform: translateY(-40px) translateX(20px); }
+                50% { transform: translateY(-80px) translateX(-20px); }
+                75% { transform: translateY(-40px) translateX(10px); }
             }
         }
+
 
 
         
