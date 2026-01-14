@@ -761,7 +761,7 @@
 
         
         /* === Мобильный фон: киберпанк с плавающими орбами === */
-       @media (max-width: 768px) {
+       @media (max-width: 992px) {
            body {
                background: linear-gradient(-45deg, #0b0f17, #1a0a2a, #3b0066, #ff0080);
                background-size: 400% 400%;
@@ -778,21 +778,23 @@
            /* Исправленные мерцающие линии */
            .mobile-line {
                position: fixed;
-               width: 4px;             /* Сделаем чуть толще */
-               height: 150%;
-               top: -25%;
-               left: -10px;            /* Установим четкую стартовую позицию */
-               background: linear-gradient(to bottom, #00ffff, #ff00ff);
-               opacity: 0.5;           /* Увеличим яркость */
-               z-index: 0;             /* Убедимся, что они выше фона, но под текстом */
-               animation: lineMove 5s linear infinite;
-               pointer-events: none;   /* Чтобы линии не мешали нажимать на кнопки */
+               width: 3px;               /* Сделали чуть толще */
+               height: 150vh;            /* 150% высоты вьюпорта */
+               top: -25vh;
+               left: -10px;              /* Начальная точка за пределами экрана */
+               background: linear-gradient(to bottom, transparent, var(--neon-blue), var(--neon-pink), transparent);
+               opacity: 0.6;             /* Сделали ярче */
+               z-index: 0;               /* Теперь они ПОВЕРХ карточек */
+               pointer-events: none;     /* Чтобы не мешали нажимать кнопки */
+               display: block;            /* По умолчанию скрыты */
+               animation: lineMove 6s linear infinite;
            }
+        }
        
-           @keyframes lineMove {
-               0% { transform: translateX(0); }
-               100% { transform: translateX(100vw); }
-           }
+        @keyframes lineMove {
+              0% { transform: translateX(-10vw) rotate(15deg); }
+              100% { transform: translateX(110vw) rotate(15deg); }
+        }
        }
 
 
