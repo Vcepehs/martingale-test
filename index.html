@@ -766,7 +766,7 @@
                background: linear-gradient(-45deg, #0b0f17, #1a0a2a, #3b0066, #ff0080);
                background-size: 400% 400%;
                animation: mobileGradient 15s ease infinite;
-               overflow: hidden;
+               overflow-x: hidden;
            }
 
           @keyframes mobileGradient {
@@ -775,15 +775,18 @@
                100% { background-position: 0% 50%; }
            }
 
-           /* мерцающие линии */
+           /* Исправленные мерцающие линии */
            .mobile-line {
                position: fixed;
-               width: 2px;
+               width: 4px;             /* Сделаем чуть толще */
                height: 150%;
                top: -25%;
+               left: -10px;            /* Установим четкую стартовую позицию */
                background: linear-gradient(to bottom, #00ffff, #ff00ff);
-               opacity: 0.3;
+               opacity: 0.5;           /* Увеличим яркость */
+               z-index: 0;             /* Убедимся, что они выше фона, но под текстом */
                animation: lineMove 5s linear infinite;
+               pointer-events: none;   /* Чтобы линии не мешали нажимать на кнопки */
            }
        
            @keyframes lineMove {
@@ -1398,4 +1401,5 @@
 </script>
 </body>
 </html>
+
 
