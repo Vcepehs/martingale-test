@@ -759,6 +759,67 @@
             
         }
 
+        /* === Мобильный фон === */
+        @media (max-width: 480px) {
+
+            body {
+                background: #05080f; /* базовый цвет */
+            }
+
+            .mobile-bg {
+                position: fixed;
+                inset: 0;
+                z-index: -1;
+                background: linear-gradient(
+                    135deg,
+                    #05080f,
+                    #0b1d2e,
+                    #120b2e,
+                    #001a14
+                );
+                background-size: 400% 400%;
+                animation: mobileGradient 18s ease infinite;
+                overflow: hidden;
+            }
+
+            .mobile-bg::before,
+            .mobile-bg::after {
+                content: '';
+                position: absolute;
+                width: 280px;
+                height: 280px;
+                border-radius: 50%;
+                filter: blur(90px);
+                opacity: 0.55;
+                animation: floatOrb 16s ease-in-out infinite;
+            }
+
+            .mobile-bg::before {
+                background: #00ffff;
+                top: 15%;
+                left: -60px;
+            }
+
+            .mobile-bg::after {
+                background: #ff00ff;
+                bottom: 10%;
+                right: -60px;
+                animation-delay: -8s;
+            }
+
+            @keyframes mobileGradient {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+        
+            @keyframes floatOrb {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-60px); }
+            }
+        }
+
+
         
     </style>
 </head>
@@ -766,6 +827,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <body>
+    <div class="mobile-bg"></div>
     <canvas id="particleCanvas"></canvas>
 
     <div class="h1-wrapper" style="position: relative;">
