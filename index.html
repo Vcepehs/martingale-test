@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    
 
 
    <style>
@@ -756,6 +757,15 @@
                 border-bottom: 1px solid #1f2a33;
             }
 
+            .actions-container {
+                flex-direction: column; /* На телефоне кнопки встанут одна под другой */
+                gap: 12px;
+            }
+                
+            .actions-container button {
+                width: 100%;        /* Кнопки на всю ширину для удобного нажатия пальцем */
+            }
+
             
         }
 
@@ -778,6 +788,7 @@
            /* Исправленные мерцающие линии */
            .mobile-line {
                position: fixed;
+               box-shadow: 0 0 10px var(--neon-blue);
                width: 3px;               /* Сделали чуть толще */
                height: 150vh;            /* 150% высоты вьюпорта */
                top: -25vh;
@@ -795,8 +806,18 @@
               0% { transform: translateX(-10vw) rotate(15deg); }
               100% { transform: translateX(110vw) rotate(15deg); }
         }
-       }
 
+        .actions-container {
+            display: flex;
+            gap: 15px;            /* Расстояние между кнопками */
+            margin-top: 10px;
+            flex-wrap: wrap;      /* Позволяет кнопкам переноситься */
+        }
+
+        .actions-container button {
+            flex: 1;              /* Кнопки будут растягиваться поровну */
+            min-width: 160px;     /* Чтобы на очень узких экранах они не сжимались в кашу */
+        }
 
 
         
@@ -832,8 +853,10 @@
             <label>Депозит:<input type="number" id="bank" value="1000"></label>
             <label>Кол-во ступеней:<input type="number" id="steps" value="5"></label>
         </div>
-        <button id="calcBtn">Рассчитать</button>
-        <button id="savePdfBtn">Сохранить в PDF</button>
+        <div class="actions-container">
+            <button id="calcBtn" onclick="calcBtn">Рассчитать</button>
+            <button class="pdf-btn" id="savePdfBtn">Сохранить в PDF</button>
+        </div>
     </div>
 
     <div class="card">
