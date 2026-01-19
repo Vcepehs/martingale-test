@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
 
 
    <style>
@@ -819,6 +821,38 @@
             min-width: 160px;     /* Чтобы на очень узких экранах они не сжимались в кашу */
         }
 
+        .progress-bar {
+            width: 100%;
+            height: 18px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            transition: width 0.4s ease;
+        }
+
+        tbody tr.goal-done {
+            background: rgba(0, 255, 136, 0.18) !important;
+        }
+
+        tbody tr.goal-done td {
+            color: #00ff88;
+        }
+
+        .goal-done td {
+            color: #00ff88;
+        }
+
+        .goal-check {
+            transform: scale(1.2);
+            cursor: pointer;
+        }
 
         
     </style>
@@ -854,8 +888,8 @@
             <label>Кол-во ступеней:<input type="number" id="steps" value="5"></label>
         </div>
         <div class="actions-container">
-            <button id="calcBtn" onclick="calcBtn">Рассчитать</button>
-            <button class="pdf-btn" id="savePdfBtn">Сохранить в PDF</button>
+            <button id="calcBtn">Рассчитать</button>
+            <button id="savePdfBtn" class="pdf-btn">Сохранить в PDF</button>
         </div>
     </div>
 
@@ -889,6 +923,61 @@
     </div>
 
     <div class="card">
+        <h2>Цель роста депозита</h2>
+
+        <div class="param-grid">
+            <label>Текущий депозит:
+                <input type="number" id="goalStart" value="1000">
+            </label>
+
+            <label>Целевой депозит:
+                <input type="number" id="goalTarget" value="2000">
+            </label>
+
+            <label>Количество дней:
+                <input type="number" id="goalDays" value="30">
+            </label>
+        </div>
+
+        <div class="actions-container">
+            <button id="goalCalcBtn">Рассчитать цель</button>
+        </div>
+
+    </div>
+
+    <div class="card">
+       <h2>Прогресс достижения цели</h2>
+
+       <div class="progress-info">
+           <span id="goalProgressText">Выполнено: 0%</span>
+       </div>
+   
+       <div class="progress-bar">
+           <div class="progress-fill" id="goalProgressFill"></div>
+       </div>
+   </div>
+
+    <div class="card">
+        <div id="goalTableContainer">
+        <h2>План роста по дням</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>День</th>
+                        <th>Плановый депозит</th>
+                        <th>Рост за день (%)</th>
+                        <th>Достигнуто</th>
+                    </tr>
+                </thead>
+                <tbody id="goalTable"></tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+
+    <div class="card">
         <h2>График</h2>
         <canvas id="martingaleChart" style="max-height:300px;"></canvas>
     </div>
@@ -913,58 +1002,381 @@
 
     const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
 
+    let growthPlanData = [];
+
     document.getElementById('savePdfBtn').addEventListener('click', saveMartingalePDF);
 
-    // Функция сохранения таблицы
-    async function saveMartingalePDF() {
-        const { jsPDF } = window.jspdf;
-        const element = document.getElementById('martingale-pdf');
-    
-        if (!element) {
-            alert('Таблица не найдена');
+    document.addEventListener('DOMContentLoaded', () => {
+        // ==== Восстановление полей мартингейла ====
+        const savedStart = localStorage.getItem('m_startBet');
+        const savedPayout = localStorage.getItem('m_payout');
+        const savedMultiplier = localStorage.getItem('m_multiplier');
+        const savedBank = localStorage.getItem('m_bank');
+        const savedSteps = localStorage.getItem('m_steps');
+
+        if (savedStart && savedPayout && savedMultiplier && savedBank && savedSteps) {
+            document.getElementById('startBet').value = savedStart;
+            document.getElementById('payout').value = savedPayout * 100;
+            document.getElementById('multiplier').value = savedMultiplier;
+            document.getElementById('bank').value = savedBank;
+            document.getElementById('steps').value = savedSteps;
+            document.getElementById('calcBtn').click();
+        }
+
+        // ==== Восстановление полей цели ====
+        const goalStart = localStorage.getItem('goal_start');
+        const goalTarget = localStorage.getItem('goal_target');
+        const goalDays = localStorage.getItem('goal_days');
+
+        if (goalStart && goalTarget && goalDays) {
+            document.getElementById('goalStart').value = goalStart;
+            document.getElementById('goalTarget').value = goalTarget;
+            document.getElementById('goalDays').value = goalDays;
+            calculateGoal();
+        }
+
+        // ==== Кнопка расчета цели ====
+        document.getElementById('goalCalcBtn').addEventListener('click', calculateGoal);
+
+        // ==== Кнопка расчета мартингейла ====
+        document.getElementById('calcBtn').addEventListener('click', function() {
+            const startBet = Number(document.getElementById('startBet').value);
+            const payout = Number(document.getElementById('payout').value) / 100;
+            const multiplier = Number(document.getElementById('multiplier').value);
+            const bank = Number(document.getElementById('bank').value);
+            const steps = Number(document.getElementById('steps').value);
+
+            // Сохраняем значения
+            localStorage.setItem('m_startBet', startBet);
+            localStorage.setItem('m_payout', payout);
+            localStorage.setItem('m_multiplier', multiplier);
+            localStorage.setItem('m_bank', bank);
+            localStorage.setItem('m_steps', steps);
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            growthPlanData = [];
+
+            let totalRisk = 0;
+            let currentBet = startBet;
+            let lastProfit = 0;
+            const stepsArray = [];
+            const cumulativeLossArray = [];
+            const profitArray = [];
+
+            for (let i = 1; i <= steps; i++) {
+                totalRisk += currentBet;
+                lastProfit = currentBet * payout - (totalRisk - currentBet);
+
+                const row = document.createElement('tr');
+                if (totalRisk > bank) row.classList.add('danger');
+
+                row.innerHTML = `
+                    <td>${i}</td>
+                    <td>${formatNumber(currentBet)}</td>
+                    <td>${formatNumber(totalRisk)}</td>
+                    <td>${formatNumber(lastProfit)}</td>
+                `;
+                tbody.appendChild(row);
+
+                growthPlanData.push([
+                    i,
+                    currentBet.toFixed(2),
+                    totalRisk.toFixed(2),
+                    lastProfit.toFixed(2)
+                ]);
+
+                stepsArray.push(i);
+                cumulativeLossArray.push(totalRisk);
+                profitArray.push(lastProfit);
+
+                currentBet *= multiplier;
+            }
+
+            animateNumber('totalRisk', totalRisk, '$');
+            animateNumber('profit', lastProfit, '$');
+            animateNumber('load', (totalRisk / bank) * 100, '%');
+
+            colorize(document.getElementById('profit'), lastProfit);
+
+            const warning = document.getElementById('riskWarning');
+            if ((totalRisk / bank) * 100 >= 80) warning.classList.add('show');
+            else warning.classList.remove('show');
+
+            renderGraph(stepsArray, cumulativeLossArray, profitArray);
+        });
+    });
+
+    // ==================== Цель ====================
+    function calculateGoal() {
+        const start = Number(document.getElementById('goalStart').value);
+        const target = Number(document.getElementById('goalTarget').value);
+        const days = Number(document.getElementById('goalDays').value);
+
+        if (start <= 0 || target <= start || days <= 0) {
+            alert('Проверь корректность введённых данных');
             return;
         }
 
-        const canvas = await html2canvas(element, {
-            scale: 2,
-            backgroundColor: '#0b0f14',
-            useCORS: true
-        });
+        localStorage.setItem('goal_start', start);
+        localStorage.setItem('goal_target', target);
+        localStorage.setItem('goal_days', days);
 
-        const imgData = canvas.toDataURL('image/png');
+        const tbody = document.getElementById('goalTable');
+        tbody.innerHTML = '';
+
+        const dailyRate = Math.pow(target / start, 1 / days) - 1;
+        let current = start;
+
+        for (let day = 1; day <= days; day++) {
+            current *= (1 + dailyRate);
+            const row = document.createElement('tr');
+            const saved = localStorage.getItem(`goal_day_${day}`) === 'true';
+
+            row.innerHTML = `
+                <td>${day}</td>
+                <td>${formatNumber(current)}</td>
+                <td class="profit">${(dailyRate * 100).toFixed(2)}%</td>
+                <td>
+                    <input type="checkbox" class="goal-check" ${saved ? 'checked' : ''}>
+                </td>
+            `;
+
+            if (saved) row.classList.add('goal-done');
+
+            const checkbox = row.querySelector('.goal-check');
+            checkbox.addEventListener('change', () => {
+                row.classList.toggle('goal-done', checkbox.checked);
+                localStorage.setItem(`goal_day_${day}`, checkbox.checked);
+                updateGoalProgress();
+            });
+
+            tbody.appendChild(row);
+        }
+
+        updateGoalProgress();
+    }    
+
+    // ==================== Прогресс цели ====================
+    function updateGoalProgress() {
+        const checks = document.querySelectorAll('.goal-check');
+        const checked = document.querySelectorAll('.goal-check:checked');
+
+        const percent = checks.length
+            ? Math.round((checked.length / checks.length) * 100)
+            : 0;
+
+        document.getElementById('goalProgressText').textContent = `Выполнено: ${percent}%`;
+        document.getElementById('goalProgressFill').style.width = percent + '%';
+    }
+
+    // ==================== PRO: СОХРАНЕНИЕ PDF БЕЗ ШУМА И ГРАДИЕНТОВ ====================
+    async function saveMartingalePDF() {
+        const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
-
+    
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
-
         const margin = 10;
-        const imgWidth = pageWidth - margin * 2;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const contentWidth = pageWidth - (margin * 2);
 
-        let y = margin;
-        let remainingHeight = imgHeight;
-        let position = 0;
+        // Цветовая палитра для PDF (без прозрачности)
+        const PDF_THEME = {
+            bg: '#0b0f17',       // Чистый темный фон
+            cardBg: '#111827',   // Чуть светлее для карточек
+            accent: '#4ade80',   // Ярко-зеленый (неон)
+            text: '#ffffff',     // Белый текст
+            border: '#1f2937',   // Границы ячеек
+            headerBg: '#16a34a'  // Фон шапки таблицы
+        };
 
-        while (remainingHeight > 0) {
-            pdf.addImage(
-                imgData,
-                'PNG',
-                margin,
-                y - position,
-                imgWidth,
-                imgHeight
-            );
+        // 1. Создаем "Стерильный контейнер"
+        const sandbox = document.createElement('div');
+        sandbox.style.cssText = `
+            position: absolute; left: -9999px; top: 0;
+            width: 800px; font-family: 'Orbitron', sans-serif;
+            background: ${PDF_THEME.bg}; color: ${PDF_THEME.text};
+        `;
+        document.body.appendChild(sandbox);
 
-            remainingHeight -= pageHeight - margin * 2;
-            position += pageHeight - margin * 2;
+        // Вспомогательная функция для отрисовки "чистого" элемента
+        async function addElementToPdf(element, title = "") {
+                if (!element) return null;
+                sandbox.innerHTML = '';
+        
+                if (title) {
+                    const t = document.createElement('h2');
+                    t.innerText = title;
+                    t.style.cssText = `
+                        color: ${PDF_THEME.accent}; 
+                        margin: 0 0 15px 0; padding: 10px 0;
+                        font-size: 24px; text-align: center; width: 100%;
+                        font-family: 'Orbitron', sans-serif; text-transform: uppercase;
+                    `;
+                    sandbox.appendChild(t);
+                }
 
-            if (remainingHeight > 0) {
+                const clone = element.cloneNode(true);
+        
+                // --- УЛУЧШАЕМ ВИДИМОСТЬ СТУПЕНЕЙ ---
+                clone.style.cssText = `
+                    background: #111827 !important; /* Глубокий непрозрачный цвет */
+                    box-shadow: none !important;
+                    border: 2px solid #1f2937 !important; /* Утолщаем границу */
+                    backdrop-filter: none !important;
+                    filter: none !important;
+                    opacity: 1 !important;
+                    width: 100% !important;
+                    visibility: visible !important;
+                    display: block !important;
+                `;
+
+                // Делаем текст внутри клона максимально ярким (белым и зеленым)
+                clone.querySelectorAll('*').forEach(el => {
+                    el.style.opacity = '1 !important';
+                    el.style.textShadow = 'none !important';
+                    if (window.getComputedStyle(el).color === 'rgba(0, 0, 0, 0)') {
+                        el.style.color = '#ffffff';
+                    }
+                });
+
+                // Если внутри есть таблица (Ступени), красим её ячейки в непрозрачный цвет
+                const tables = clone.querySelectorAll('table');
+                tables.forEach(table => {
+                    table.style.background = '#111827';
+                    table.querySelectorAll('td, th').forEach(cell => {
+                        cell.style.border = '1px solid #374151';
+                        cell.style.color = '#ffffff';
+                        cell.style.background = '#111827';
+                    });
+                });
+
+                sandbox.appendChild(clone);
+
+                const canvas = await html2canvas(sandbox, {
+                    scale: 3, // Увеличиваем разрешение для четкости мелких цифр
+                    backgroundColor: PDF_THEME.bg,
+                    logging: false,
+                    scrollY: -window.scrollY
+                });
+
+                return { img: canvas.toDataURL('image/png'), h: (canvas.height * contentWidth) / canvas.width };
+        }
+
+        // --- СТРАНИЦА 1: Ступени ---
+        let currentY = margin;
+   
+
+        // Таблица Мартингейла
+        const martTable = document.getElementById('martingale-pdf');
+        if (martTable) {
+            const result = await addElementToPdf(martTable.closest('.card'), "");
+            if (currentY + result.h > pageHeight - margin) { pdf.addPage(); currentY = margin; }
+            pdf.addImage(result.img, 'PNG', margin, currentY, contentWidth, result.h);
+            currentY += result.h + 10;
+        }
+
+        // --- СТРАНИЦА 2+: План роста (Сотни строк) ---
+        const goalTable = document.querySelector('#goalTableContainer table');
+        if (goalTable) {
+            // Прокручиваем страницу в самый верх, чтобы html2canvas не считал смещение
+            window.scrollTo(0, 0);
+
+            const rows = Array.from(goalTable.querySelectorAll('tbody tr'));
+            const headHtml = goalTable.querySelector('thead').innerHTML;
+            const rowsPerPage = 37; 
+
+            for (let i = 0; i < rows.length; i += rowsPerPage) {
                 pdf.addPage();
+            
+                // СТРОГО фиксируем верхнюю точку для каждой страницы PDF
+                const tableY = 10; 
+
+                // Очищаем песочницу
+                sandbox.innerHTML = '';
+                // Важно: box-sizing: border-box и обнуление всех отступов
+                sandbox.style.cssText = `
+                    position: absolute; left: -9999px; top: 0;
+                    width: 1000px; padding: 0; margin: 0;
+                    background: ${PDF_THEME.bg}; box-sizing: border-box;
+                `;
+
+                const chunk = rows.slice(i, i + rowsPerPage);
+                let chunkHtml = chunk.map(r => {
+                    const rClone = r.cloneNode(true);
+                    const chk = rClone.querySelector('input');
+                    if (chk) {
+                        const status = chk.checked ? 
+                            `<b style="color:${PDF_THEME.accent}">OK</b>` : 
+                            `<span style="color:#4b5563">—</span>`;
+                        chk.parentElement.innerHTML = status;
+                    }
+                    rClone.querySelectorAll('td').forEach(td => {
+                        td.style.cssText = `
+                            border: 1px solid ${PDF_THEME.border}; 
+                            padding: 8px; 
+                            color: white; 
+                            background: ${PDF_THEME.cardBg};
+                            font-size: 14px;
+                            margin: 0;
+                        `;
+                    });
+                    return rClone.outerHTML;
+                }).join('');
+
+                // Обертка с ПРЯМЫМ указанием padding: 0
+                sandbox.innerHTML = `
+                    <div style="margin: 0; padding: 0; background:${PDF_THEME.bg}; width: 100%;">
+                        <div style="color:${PDF_THEME.accent}; font-size: 22px; font-weight: bold; padding: 15px 0; font-family: 'Orbitron', sans-serif; text-transform: uppercase; text-align: center; width: 100%;">
+                            TRADING PLAN - PAGE ${Math.floor(i/rowsPerPage) + 1}
+                        </div>
+                        <table style="width:100%; border-collapse:collapse; margin: 0;">
+                            <thead style="background:${PDF_THEME.headerBg}; color:white;">${headHtml}</thead>
+                            <tbody>${chunkHtml}</tbody>
+                        </table>
+                    </div>
+                `;
+
+                // Чистим стили шапки таблицы
+                sandbox.querySelectorAll('th').forEach(th => {
+                    th.style.cssText = `
+                        padding: 12px 8px; 
+                        border: 1px solid ${PDF_THEME.border}; 
+                        text-align: left;
+                        font-size: 13px;
+                        color: #ffffff !important;           /* ПРИНУДИТЕЛЬНО БЕЛЫЙ ЦВЕТ */
+                        text-transform: uppercase;
+                        background: ${PDF_THEME.headerBg};
+                        margin: 0;
+                    `;
+                });
+
+                // Рендерим текущую страницу
+                const canvas = await html2canvas(sandbox, { 
+                    scale: 2, 
+                    backgroundColor: PDF_THEME.bg,
+                    logging: false,
+                    useCORS: true,
+                    // Эти три параметра критичны для фикса "сползания":
+                    scrollY: -window.scrollY,
+                    scrollX: -window.scrollX,
+                    windowWidth: document.documentElement.offsetWidth,
+                    windowHeight: document.documentElement.offsetHeight
+                });
+
+                const imgH = (canvas.height * contentWidth) / canvas.width;
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', margin, tableY, contentWidth, imgH);
             }
         }
 
-        pdf.save('martingale-steps.pdf');
+        // Удаляем песочницу
+        document.body.removeChild(sandbox);
+    
+        // Сохранение
+        pdf.save('Balaclava_Trade_Strategy.pdf');
     }
+
+
 
 
     // Функция для окрашивания числа в цвет
@@ -1090,61 +1502,6 @@
 
         renderGraph(labels, data0, data1);
     }
-
-    // Основной расчёт
-    document.getElementById('calcBtn').addEventListener('click', function() {
-        const startBet = Number(document.getElementById('startBet').value);
-        const payout = Number(document.getElementById('payout').value) / 100;
-        const multiplier = Number(document.getElementById('multiplier').value);
-        const bank = Number(document.getElementById('bank').value);
-        const steps = Number(document.getElementById('steps').value);
-
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-
-        let totalRisk = 0,
-            currentBet = startBet,
-            lastProfit = 0;
-
-        const stepsArray = [],
-              cumulativeLossArray = [],
-              profitArray = [];
-
-        for (let i = 1; i <= steps; i++) {
-            totalRisk += currentBet;
-            lastProfit = currentBet * payout - (totalRisk - currentBet);
-
-            const row = document.createElement('tr');
-            if (totalRisk > bank) row.classList.add('danger');
-
-            row.innerHTML = `
-                <td>${i}</td>
-                <td>${formatNumber(currentBet)}</td>
-                <td>${formatNumber(totalRisk)}</td>
-                <td>${formatNumber(lastProfit)}</td>
-            `;
-
-            tbody.appendChild(row);
-
-            stepsArray.push(i);
-            cumulativeLossArray.push(totalRisk);
-            profitArray.push(lastProfit);
-
-            currentBet *= multiplier;
-        }
-
-        animateNumber('totalRisk', totalRisk, '$');
-        animateNumber('profit', lastProfit, '$');
-        animateNumber('load', (totalRisk / bank) * 100, '%');
-
-        colorize(document.getElementById('profit'), lastProfit);
-
-        const warning = document.getElementById('riskWarning');
-        if ((totalRisk / bank) * 100 >= 80) warning.classList.add('show');
-        else warning.classList.remove('show');
-
-        renderGraph(stepsArray, cumulativeLossArray, profitArray);
-    });
 
     // Смена темы
     document.getElementById('themeBtn').addEventListener('click', () => {
@@ -1426,5 +1783,3 @@
 </script>
 </body>
 </html>
-
-
